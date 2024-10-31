@@ -1,0 +1,72 @@
+#[test_only]
+module bank_apt::bank_apt_tests {
+    #[test_only]
+    use std::signer;
+    #[test_only]
+    use bank_apt::bank::{Self};
+    #[test_only]
+    use aptos_framework::account::{Self};
+    #[test_only]
+    use aptos_framework::aptos_coin::{Self,AptosCoin};
+    #[test_only]
+    use aptos_framework::coin::{Self, MintCapability};
+
+    #[test_only]
+    fun give_coins(mint_capability: &MintCapability<AptosCoin>, to: &signer, amount : u64) {
+        let to_addr = signer::address_of(to);
+        if (!account::exists_at(to_addr)) {
+            account::create_account_for_test(to_addr);
+        };
+        coin::register<AptosCoin>(to);
+
+        let coins = coin::mint(amount, mint_capability);
+        coin::deposit(to_addr, coins);
+    }
+    // #[test] still required since
+    // even if module is declared 
+    // for test only
+    #[test]
+    fun this_is_ok(){
+
+    }
+
+    #[test(client = @0x1,bank = @0xB)]
+    // no amount of money provided
+    #[expected_failure(abort_code = 0,location=bank)]
+    fun amount_is_zero_fail(client : &signer, bank : &signer){
+        bank::deposit(client,bank,0);
+    }
+
+    #[test(client = @0x1,bank = @0xB)]
+    fun test_bank_existence(bank : &signer){
+        bank::init_module(bank);
+        assert!(bank::bank_exists(bank),0);
+    }
+
+    #[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
+    fun test_bank_deposit(client : &signer, bank : &signer, aptos_framework:&signer){
+        bank::init_module(bank);
+        let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
+        give_coins(&mint_capability,client,1000);
+
+        bank::deposit(client,bank,500);
+        assert!(bank::account_balance(client,bank) == 500,1);
+        coin::destroy_mint_cap(mint_capability);
+        coin::destroy_burn_cap(burn_capability);
+    }
+
+#[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
+    fun test_bank_update_deposit(client : &signer, bank : &signer, aptos_framework:&signer){
+        bank::init_module(bank);
+        let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
+        give_coins(&mint_capability,client,1000);
+
+        bank::deposit(client,bank,500);
+        bank::deposit(client,bank,200);
+        assert!(bank::account_balance(client,bank) == 700,1);
+        coin::destroy_mint_cap(mint_capability);
+        coin::destroy_burn_cap(burn_capability);
+    }
+
+
+}
