@@ -2,10 +2,9 @@ module bank_apt::bank {
 
     use std::coin::{Self,Coin};
     use aptos_framework::aptos_coin::AptosCoin;
-    // use std::option;
     use std::signer;
     use std::simple_map::{Self, SimpleMap};
-
+    // use aptos_std::type_info;
     // mapping users -> coin(amount)
     // using default coin since 
     // transaction with generics are not
@@ -26,7 +25,7 @@ module bank_apt::bank {
         move_to(account,bank);
     }
 
-    // deposit is alllwed only to the signer of the transaction (consistently with solidity implementation)
+    // deposit is allowed only to the signer of the transaction (consistently with solidity implementation)
     public entry fun deposit(to : &signer, bank_account : &signer, amount : u64) acquires Bank  {
         // do not allow pointless deposits
         assert!(amount > 0, EAmountIsZero);
@@ -46,6 +45,7 @@ module bank_apt::bank {
             simple_map::add(&mut bank.clients, signer::address_of(to), deposit);
         }
     }
+
     
     //
     public entry fun withdraw(client : &signer, bank : &signer, amount : u64) acquires Bank {
