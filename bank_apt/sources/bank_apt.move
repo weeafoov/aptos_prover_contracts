@@ -48,14 +48,15 @@ module bank_apt::bank {
     }
     
     //
-    // public entry fun withdraw(account : &signer, amount : u64, bank : Bank<CoinType>) : Coin<CoinType> {
-    //     // do not proceed if there is 
-    //     // no account in the bank
-    //     assert!(simple_map::contains(bank, signer::address_of(account)),ENoAccount);
-    //     assert!(coin::value(amount) > 0,EAmountIsZero);
-    //     let opt_index = simple_map::find(bank, signer::address_of(account));
-    //     coin::extract(bank[option::extract(opt_index)],amount);
-    // }
+    public entry fun withdraw(client : &signer, bank : &signer, amount : u64) acquires Bank {
+        // do not withdraw 0 
+        assert!(amount > 0,EAmountIsZero);
+        let bank = borrow_global_mut<Bank>(signer::address_of(bank));
+        let current_balance = simple_map::borrow_mut(&mut bank.clients, &signer::address_of(client));
+        let withdrawn = coin::extract(current_balance,amount);
+        coin::deposit(signer::address_of(client), withdrawn);
+    }
+
     #[test_only]
     public fun init_module(initiator : &signer){
         init(initiator);

@@ -14,11 +14,13 @@ module bank_apt::bank_apt_tests {
     #[test_only]
     fun give_coins(mint_capability: &MintCapability<AptosCoin>, to: &signer, amount : u64) {
         let to_addr = signer::address_of(to);
+        // required to correctly deposit coin further below
         if (!account::exists_at(to_addr)) {
             account::create_account_for_test(to_addr);
         };
+        // allow to store coins for the receiver of the funds
         coin::register<AptosCoin>(to);
-
+        //
         let coins = coin::mint(amount, mint_capability);
         coin::deposit(to_addr, coins);
     }
