@@ -16,7 +16,9 @@ spec bank_apt::bank {
         aborts_if !exists<Bank>(signer::address_of(bank));
         // aborts_if !coin::spec_is_account_registered<coin::CoinStore<AptosCoin>>(signer::address_of(client));
         // aborts_if !exists<coin::CoinStore<AptosCoin>>(signer::address_of(client));
-        // aborts_if global<coin::CoinStore<AptosCoin>>(signer::address_of(client)).frozen;
+        // aborts_if !coin::is_account_registered<coin::CoinStore<AptosCoin>>(signer::address_of(client)); fails since it is an impure function -> not callable from specs
+        aborts_if !exists<coin::CoinInfo<AptosCoin>>(signer::address_of(client));
+        aborts_if global<coin::CoinStore<AptosCoin>>(signer::address_of(client)).frozen;
         let clients = global<Bank>(signer::address_of(bank)).clients;
         aborts_if !simple_map::spec_contains_key(clients, signer::address_of(client));
         let client_bank_money = simple_map::spec_get(clients,signer::address_of(client)).value;

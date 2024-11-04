@@ -2,6 +2,7 @@ module bank_apt::bank {
 
     use std::coin::{Self,Coin};
     use aptos_framework::aptos_coin::AptosCoin;
+    use aptos_framework::aptos_account;
     use std::signer;
     use std::simple_map::{Self, SimpleMap};
     // use aptos_std::type_info;
@@ -54,7 +55,8 @@ module bank_apt::bank {
         let bank = borrow_global_mut<Bank>(signer::address_of(bank));
         let current_balance = simple_map::borrow_mut(&mut bank.clients, &signer::address_of(client));
         let withdrawn = coin::extract(current_balance,amount);
-        coin::deposit(signer::address_of(client), withdrawn);
+        // coin::deposit(signer::address_of(client), withdrawn);
+        aptos_account::deposit_coins<AptosCoin>(signer::address_of(client),withdrawn);
     }
 
     #[test_only]
