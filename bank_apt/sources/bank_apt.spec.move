@@ -14,8 +14,9 @@ spec bank_apt::bank {
         // related to transfer of coin
         aborts_if amount == 0;
         aborts_if !exists<Bank>(bank);
+        // aborts_if !exists<coin::CoinInfo<coin::CoinStore<AptosCoin>>>(signer::address_of(client));
         aborts_if !coin::spec_is_account_registered<coin::CoinStore<AptosCoin>>(signer::address_of(client));
-        aborts_if !exists<coin::CoinInfo<AptosCoin>>(signer::address_of(client));
+        aborts_if !coin::is_coin_initialized<coin::CoinStore<AptosCoin>>();
         aborts_if global<coin::CoinStore<AptosCoin>>(signer::address_of(client)).frozen;
         let clients = global<Bank>(bank).clients;
         aborts_if !simple_map::spec_contains_key(clients, signer::address_of(client));
