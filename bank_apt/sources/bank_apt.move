@@ -19,7 +19,7 @@ module bank_apt::bank {
 
     // guaranteed to be called once only
     // by move on aptos rule
-    fun init(account : &signer) {
+    fun init_module(account : &signer) {
         let bank = Bank{
             clients : simple_map::new()
         };
@@ -60,8 +60,8 @@ module bank_apt::bank {
     }
 
     #[test_only]
-    public fun init_module(initiator : &signer){
-        init(initiator);
+    public fun test_init_module(initiator : &signer){
+        init_module(initiator);
     }
     #[test_only]
     public fun bank_exists(initiator : &signer) : bool {

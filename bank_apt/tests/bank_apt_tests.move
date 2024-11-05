@@ -41,13 +41,13 @@ module bank_apt::bank_apt_tests {
 
     #[test(bank = @0xB)]
     fun test_bank_existence(bank : &signer){
-        bank::init_module(bank);
+        bank::test_init_module(bank);
         assert!(bank::bank_exists(bank),0);
     }
 
     #[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
     fun test_bank_deposit(client : &signer, bank : &signer, aptos_framework:&signer){
-        bank::init_module(bank);
+        bank::test_init_module(bank);
         let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
         give_coins(&mint_capability,client,1000);
 
@@ -59,7 +59,7 @@ module bank_apt::bank_apt_tests {
 
 #[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
     fun test_bank_update_deposit(client : &signer, bank : &signer, aptos_framework:&signer){
-        bank::init_module(bank);
+        bank::test_init_module(bank);
         let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
         give_coins(&mint_capability,client,1000);
 
@@ -73,7 +73,7 @@ module bank_apt::bank_apt_tests {
 #[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
     #[expected_failure(abort_code=0, location=bank)]
     fun test_bank_withdraw_zero(client : &signer, bank : &signer, aptos_framework:&signer){
-        bank::init_module(bank);
+        bank::test_init_module(bank);
         let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
         give_coins(&mint_capability,client,1000);
 
@@ -86,7 +86,7 @@ module bank_apt::bank_apt_tests {
 
 #[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
     fun test_bank_withdraw(client : &signer, bank : &signer, aptos_framework:&signer){
-        bank::init_module(bank);
+        bank::test_init_module(bank);
         let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
         give_coins(&mint_capability,client,1000);
 
