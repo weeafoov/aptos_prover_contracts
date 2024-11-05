@@ -98,4 +98,21 @@ module bank_apt::bank_apt_tests {
         coin::destroy_burn_cap(burn_capability);
     }
 
+    #[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
+    #[expected_failure]
+    fun test_overflow_account(client : &signer, bank : &signer, aptos_framework:&signer){
+        //counterexample to the prover claim that code does not fail on overflow?
+        bank::test_init_module(bank);
+        let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
+        let max_u64 = ((1u128 << 64) - 1) as u64;
+        give_coins(&mint_capability,client,max_u64);
+
+        bank::deposit(client,signer::address_of(bank),200);
+        give_coins(&mint_capability, client, 200);
+        bank::withdraw(client,signer::address_of(bank),200);
+        assert!(bank::account_balance(client,signer::address_of(bank)) == 300,1);
+
+        coin::destroy_mint_cap(mint_capability);
+        coin::destroy_burn_cap(burn_capability);
+    }
 }
