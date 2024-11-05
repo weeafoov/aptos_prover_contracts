@@ -27,11 +27,11 @@ module bank_apt::bank {
     }
 
     // deposit is allowed only to the signer of the transaction (consistently with solidity implementation)
-    public entry fun deposit(to : &signer, bank_account : &signer, amount : u64) acquires Bank  {
+    public entry fun deposit(to : &signer, bank : address, amount : u64) acquires Bank  {
         // do not allow pointless deposits
         assert!(amount > 0, EAmountIsZero);
         let deposit : Coin<AptosCoin> = coin::withdraw(to,amount);
-        let bank = borrow_global_mut<Bank>(signer::address_of(bank_account)); 
+        let bank = borrow_global_mut<Bank>(bank); 
         if (simple_map::contains_key(&bank.clients,&signer::address_of(to))){
             // exists already the account
             // so the new coin balance
@@ -49,10 +49,10 @@ module bank_apt::bank {
 
     
     //
-    public entry fun withdraw(client : &signer, bank : &signer, amount : u64) acquires Bank {
+    public entry fun withdraw(client : &signer, bank : address, amount : u64) acquires Bank {
         // do not withdraw 0 
         assert!(amount > 0,EAmountIsZero);
-        let bank = borrow_global_mut<Bank>(signer::address_of(bank));
+        let bank = borrow_global_mut<Bank>(bank);
         let current_balance = simple_map::borrow_mut(&mut bank.clients, &signer::address_of(client));
         let withdrawn = coin::extract(current_balance,amount);
         // coin::deposit(signer::address_of(client), withdrawn);
@@ -68,8 +68,8 @@ module bank_apt::bank {
         exists<Bank>(signer::address_of(initiator))
     }
     #[test_only]
-    public fun account_balance(account : &signer, bank : &signer) : u64 acquires Bank {
-        let bank = borrow_global<Bank>(signer::address_of(bank));
+    public fun account_balance(account : &signer, bank : address) : u64 acquires Bank {
+        let bank = borrow_global<Bank>(bank);
         let balance = simple_map::borrow(&bank.clients,&signer::address_of(account));
         coin::value(balance)
     }

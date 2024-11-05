@@ -35,11 +35,11 @@ module bank_apt::bank_apt_tests {
     #[test(client = @0x1,bank = @0xB)]
     // no amount of money provided
     #[expected_failure(abort_code = 0,location=bank)]
-    fun amount_is_zero_fail(client : &signer, bank : &signer){
+    fun amount_is_zero_fail(client : &signer, bank : address){
         bank::deposit(client,bank,0);
     }
 
-    #[test(client = @0x1,bank = @0xB)]
+    #[test(bank = @0xB)]
     fun test_bank_existence(bank : &signer){
         bank::init_module(bank);
         assert!(bank::bank_exists(bank),0);
@@ -51,8 +51,8 @@ module bank_apt::bank_apt_tests {
         let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
         give_coins(&mint_capability,client,1000);
 
-        bank::deposit(client,bank,500);
-        assert!(bank::account_balance(client,bank) == 500,1);
+        bank::deposit(client,signer::address_of(bank),500);
+        assert!(bank::account_balance(client,signer::address_of(bank)) == 500,1);
         coin::destroy_mint_cap(mint_capability);
         coin::destroy_burn_cap(burn_capability);
     }
@@ -63,9 +63,9 @@ module bank_apt::bank_apt_tests {
         let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
         give_coins(&mint_capability,client,1000);
 
-        bank::deposit(client,bank,500);
-        bank::deposit(client,bank,200);
-        assert!(bank::account_balance(client,bank) == 700,1);
+        bank::deposit(client,signer::address_of(bank),500);
+        bank::deposit(client,signer::address_of(bank),200);
+        assert!(bank::account_balance(client,signer::address_of(bank)) == 700,1);
         coin::destroy_mint_cap(mint_capability);
         coin::destroy_burn_cap(burn_capability);
     }
@@ -77,8 +77,8 @@ module bank_apt::bank_apt_tests {
         let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
         give_coins(&mint_capability,client,1000);
 
-        bank::deposit(client,bank,500);
-        bank::withdraw(client,bank,0);
+        bank::deposit(client,signer::address_of(bank),500);
+        bank::withdraw(client,signer::address_of(bank),0);
         coin::destroy_mint_cap(mint_capability);
         coin::destroy_burn_cap(burn_capability);
     }
@@ -90,9 +90,9 @@ module bank_apt::bank_apt_tests {
         let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
         give_coins(&mint_capability,client,1000);
 
-        bank::deposit(client,bank,500);
-        bank::withdraw(client,bank,200);
-        assert!(bank::account_balance(client,bank) == 300,1);
+        bank::deposit(client,signer::address_of(bank),500);
+        bank::withdraw(client,signer::address_of(bank),200);
+        assert!(bank::account_balance(client,signer::address_of(bank)) == 300,1);
 
         coin::destroy_mint_cap(mint_capability);
         coin::destroy_burn_cap(burn_capability);
