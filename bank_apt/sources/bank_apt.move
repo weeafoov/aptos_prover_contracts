@@ -29,7 +29,7 @@ module bank_apt::bank {
     // deposit is allowed only to the signer of the transaction (consistently with solidity implementation)
     public entry fun deposit(to : &signer, bank : address, amount : u64) acquires Bank  {
         // do not allow pointless deposits
-        assert!(amount > 0, EAmountIsZero);
+        assert!(amount != 0, EAmountIsZero);
         let deposit : Coin<AptosCoin> = coin::withdraw(to,amount);
         let bank = borrow_global_mut<Bank>(bank); 
         if (simple_map::contains_key(&bank.clients,&signer::address_of(to))){
@@ -51,7 +51,7 @@ module bank_apt::bank {
     //
     public entry fun withdraw(client : &signer, bank : address, amount : u64) acquires Bank {
         // do not withdraw 0 
-        assert!(amount > 0,EAmountIsZero);
+        assert!(amount != 0,EAmountIsZero);
         let bank = borrow_global_mut<Bank>(bank);
         let current_balance = simple_map::borrow_mut(&mut bank.clients, &signer::address_of(client));
         let withdrawn = coin::extract(current_balance,amount);
