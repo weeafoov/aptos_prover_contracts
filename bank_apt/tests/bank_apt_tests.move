@@ -27,12 +27,7 @@ module bank_apt::bank_apt_tests {
     // #[test] still required since
     // even if module is declared 
     // for test only
-    #[test]
-    fun this_is_ok(){
-
-    }
-
-    #[test(client = @0x1,bank = @0xB)]
+   #[test(client = @0x1,bank = @0xB)]
     // no amount of money provided
     #[expected_failure(abort_code = 0,location=bank)]
     fun amount_is_zero_fail(client : &signer, bank : address){
@@ -53,6 +48,8 @@ module bank_apt::bank_apt_tests {
 
         bank::deposit(client,signer::address_of(bank),500);
         assert!(bank::account_balance(client,signer::address_of(bank)) == 500,1);
+        assert!(coin::balance<AptosCoin>(signer::address_of(client)) == 500,2);
+
         coin::destroy_mint_cap(mint_capability);
         coin::destroy_burn_cap(burn_capability);
     }
@@ -66,6 +63,8 @@ module bank_apt::bank_apt_tests {
         bank::deposit(client,signer::address_of(bank),500);
         bank::deposit(client,signer::address_of(bank),200);
         assert!(bank::account_balance(client,signer::address_of(bank)) == 700,1);
+        assert!(coin::balance<AptosCoin>(signer::address_of(client)) == 300,2);
+
         coin::destroy_mint_cap(mint_capability);
         coin::destroy_burn_cap(burn_capability);
     }
@@ -79,6 +78,8 @@ module bank_apt::bank_apt_tests {
 
         bank::deposit(client,signer::address_of(bank),500);
         bank::withdraw(client,signer::address_of(bank),0);
+        assert!(coin::balance<AptosCoin>(signer::address_of(client)) == 500,2);
+
         coin::destroy_mint_cap(mint_capability);
         coin::destroy_burn_cap(burn_capability);
     }
@@ -93,6 +94,7 @@ module bank_apt::bank_apt_tests {
         bank::deposit(client,signer::address_of(bank),500);
         bank::withdraw(client,signer::address_of(bank),200);
         assert!(bank::account_balance(client,signer::address_of(bank)) == 300,1);
+        assert!(coin::balance<AptosCoin>(signer::address_of(client)) == 700,2);
 
         coin::destroy_mint_cap(mint_capability);
         coin::destroy_burn_cap(burn_capability);
