@@ -28,7 +28,6 @@ module bank_apt::bank {
     // deposit is allowed only to the signer of the transaction (consistently with solidity implementation)
     public entry fun deposit(to : &signer, bank : address, amount : u64) acquires Bank  {
         // do not allow pointless deposits
-        assert!(amount != 0, EAmountIsZero);
         let deposit : Coin<AptosCoin> = coin::withdraw(to,amount);
         let bank = borrow_global_mut<Bank>(bank); 
         if (simple_map::contains_key(&bank.clients,&signer::address_of(to))){

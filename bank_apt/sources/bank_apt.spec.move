@@ -5,10 +5,6 @@ spec bank_apt::bank {
         global sum_of_withdraw : num;
     }
 
-    // recap:
-    // * (1) deposit-contract-balance : NON REPRES
-    // * (2) deposit-not-revert: In move this fails due to 
-    //  overflow
     spec deposit {
         aborts_if amount == 0;
         aborts_if !exists<Bank>(bank);
