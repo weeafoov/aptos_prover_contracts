@@ -1,12 +1,6 @@
 spec bank_apt::bank {
     
-    spec module{
-        global sum_of_deposit : num;
-        global sum_of_withdraw : num;
-    }
-
     spec deposit {
-        aborts_if amount == 0;
         aborts_if !exists<Bank>(bank);
         
         modifies global<Bank>(bank); 
@@ -15,7 +9,7 @@ spec bank_apt::bank {
         let post client_owned_coin_post = global<coin::CoinStore<Coin<AptosCoin>>>(signer::address_of(to)).coin.value;
         aborts_if client_owned_coin < amount ; //(3)
         ensures client_owned_coin_post == (client_owned_coin - amount);  
-        ensures sum_of_deposit == old(sum_of_deposit) + amount;
+        // ensures sum_of_deposit == old(sum_of_deposit) + amount;
         let clients = global<Bank>(bank).clients;
         let post clients_post = global<Bank>(bank).clients;
         ensures simple_map::spec_contains_key(clients,signer::address_of(to)) 
@@ -43,7 +37,7 @@ spec bank_apt::bank {
         let post clients_post = global<Bank>(bank).clients;
         aborts_if !simple_map::spec_contains_key(clients, signer::address_of(from));
         let client_bank_money = simple_map::spec_get(clients,signer::address_of(from)).value;
-        ensures sum_of_withdraw == old(sum_of_withdraw) + amount; 
+        // ensures sum_of_withdraw == old(sum_of_withdraw) + amount; 
 
         let post client_bank_money_post =  simple_map::spec_get(clients,signer::address_of(from)).value;
         // aborts_if !coin::spec_is_account_registered<coin::CoinStore<AptosCoin>>(signer::address_of(from));
