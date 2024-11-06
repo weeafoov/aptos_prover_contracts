@@ -110,6 +110,37 @@ module bank_apt::bank_apt_tests {
 
     #[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
     #[expected_failure]
+    fun test_bank_deposit_too_much(client : &signer, bank : &signer, aptos_framework:&signer){
+        bank::test_init_module(bank);
+        let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
+        give_coins(&mint_capability,client,1000);
+
+        // fails here since the amount to deposit is too big 
+        // (not enough money in the account )
+        bank::deposit(client,signer::address_of(bank),1500);
+        coin::destroy_mint_cap(mint_capability);
+        coin::destroy_burn_cap(burn_capability);
+    }
+
+    #[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
+    #[expected_failure]
+    fun test_bank_withdraw_too_much(client : &signer, bank : &signer, aptos_framework:&signer){
+        bank::test_init_module(bank);
+        let (burn_capability, mint_capability) = aptos_coin::initialize_for_test(aptos_framework);
+        give_coins(&mint_capability,client,1000);
+
+        // fails here since the amount to deposit is too big 
+        // (not enough money in the account )
+        bank::deposit(client,signer::address_of(bank),500);
+        bank::withdraw(client,signer::address_of(bank),600);
+        coin::destroy_mint_cap(mint_capability);
+        coin::destroy_burn_cap(burn_capability);
+    }
+
+
+
+    #[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
+    #[expected_failure]
     fun test_overflow_account(client : &signer, bank : &signer, aptos_framework:&signer){
         //counterexample to the prover claim that code does not fail on overflow?
         bank::test_init_module(bank);
