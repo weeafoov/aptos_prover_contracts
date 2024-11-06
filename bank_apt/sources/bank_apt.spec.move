@@ -1,14 +1,23 @@
 spec bank_apt::bank {
+    
+    spec module{
+        sum_of_contracts : num;
+    }
+
+
     spec deposit {
         // pragma aborts_if_is_strict;
         aborts_if amount == 0;
+        aborts_if !exists<Bank>(bank);
+        let client_owned_coin = global<coin::CoinStore<Coin<AptosCoin>>>(signer::address_of(to)).coin.value;
+        let post client_owned_coin_post = global<coin::CoinStore<Coin<AptosCoin>>>(signer::address_of(to)).coin.value;
         // aborts_if !exists<coin::CoinStore<AptosCoin>>(signer::address_of(to));
-        aborts_if global<coin::CoinStore<Coin<AptosCoin>>>(signer::address_of(to)).coin.value < amount ; // precondition required by deposit-not-revert  
+        aborts_if client_owned_coin < amount ; // precondition required by deposit-not-revert  
         // deposit-revert-if-low-eth: a deposit call reverts if amount is greater than the APT balance of the signer.
         // aborts_if !coin::spec_is_account_registered<coin::CoinStore<AptosCoin>>(signer::address_of(to));
         // aborts_if !coin::is_coin_initialized<coin::CoinStore<AptosCoin>>();
         // aborts_if global<coin::CoinStore<AptosCoin>>(signer::address_of(to)).frozen;
-        // ensures global<coin::CoinStore<AptosCoin>>(signer::address_of(client)).coin.value == (old(global<coin::CoinStore<AptosCoin>>(signer::address_of(client))).coin.value - amount);//
+        ensures client_owned_coin_post == (client_owned_coin - amount);  
         let clients = global<Bank>(bank).clients;
         let post clients_post = global<Bank>(bank).clients;
         ensures simple_map::spec_contains_key(clients,signer::address_of(to)) 

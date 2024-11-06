@@ -30,8 +30,15 @@ module bank_apt::bank_apt_tests {
    #[test(client = @0x1,bank = @0xB)]
     // no amount of money provided
     #[expected_failure(abort_code = 0,location=bank)]
-    fun amount_is_zero_fail(client : &signer, bank : address){
+    fun deposit_amount_is_zero_fail(client : &signer, bank : address){
         bank::deposit(client,bank,0);
+    }
+    
+    #[test(client = @0x1,bank = @0xB)]
+    // no amount of money provided
+    #[expected_failure(abort_code = 0,location=bank)]
+    fun amount_is_zero_fail(client : &signer, bank : address){
+        bank::withdraw(client,bank,0);
     }
 
     #[test(bank = @0xB)]
