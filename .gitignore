@@ -3,3 +3,4 @@ tags
 .trace
 *.mvcov
 *.bpl
+*.txt
