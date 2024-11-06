@@ -5,6 +5,10 @@ spec bank_apt::bank {
         global sum_of_withdraw : num;
     }
 
+    // recap:
+    // * (1) deposit-contract-balance : NON REPRES
+    // * (2) deposit-not-revert: In move this fails due to 
+    //  overflow
     spec deposit {
         aborts_if amount == 0;
         aborts_if !exists<Bank>(bank);
@@ -13,36 +17,23 @@ spec bank_apt::bank {
         
         let client_owned_coin = global<coin::CoinStore<Coin<AptosCoin>>>(signer::address_of(to)).coin.value;
         let post client_owned_coin_post = global<coin::CoinStore<Coin<AptosCoin>>>(signer::address_of(to)).coin.value;
-        // aborts_if !exists<coin::CoinStore<AptosCoin>>(signer::address_of(to));
-        aborts_if client_owned_coin < amount ; 
-        // deposit-revert-if-low-eth: a deposit call reverts if amount is greater than the APT balance of the signer.
-        // aborts_if !coin::spec_is_account_registered<coin::CoinStore<AptosCoin>>(signer::address_of(to));
-        // aborts_if !coin::is_coin_initialized<coin::CoinStore<AptosCoin>>();
-        // aborts_if global<coin::CoinStore<AptosCoin>>(signer::address_of(to)).frozen;
+        aborts_if client_owned_coin < amount ; //(3)
         ensures client_owned_coin_post == (client_owned_coin - amount);  
         ensures sum_of_deposit == old(sum_of_deposit) + amount;
         let clients = global<Bank>(bank).clients;
         let post clients_post = global<Bank>(bank).clients;
         ensures simple_map::spec_contains_key(clients,signer::address_of(to)) 
             ==> (simple_map::spec_get(clients_post,signer::address_of(to)).value == 
-            simple_map::spec_get(clients,signer::address_of(to)).value + amount);//(1)
+            simple_map::spec_get(clients,signer::address_of(to)).value + amount);//(1,4)
         ensures !simple_map::spec_contains_key(clients,signer::address_of(to)) 
-            ==> (simple_map::spec_get(clients_post,signer::address_of(to)).value == amount);//(2)
-        // deposit-contract-balance: after a successful deposit(), the ETH balance of the contract is increased by msg.value.(1: exists a client already in the clients map, 2: there is no client in clients map)
-        // deposit-not-revert: I do belive that is not provable in Move aptos 
-        // unless the additional condition is added: 
-        // amount of coins in clients[to] < MAX_U64 + deposit
-        // otherwise there is the possibility of overflow
+            ==> (simple_map::spec_get(clients_post,signer::address_of(to)).value == amount);//(1,4)
         ensures forall c: address where c != signer::address_of(to) && simple_map::spec_contains_key(clients,c):
-            simple_map::spec_get(clients_post,c).value == simple_map::spec_get(clients,c).value; // no other client account is modified, similar to 
-        // user-balance-dec-onlyif-withdraw: the only way to decrease the balance entry of a user a is by calling withdraw with msg.sender = a. (since there is no possibility AFAIK
-        // to define properties over functions in aptos move prover)
+            simple_map::spec_get(clients_post,c).value == simple_map::spec_get(clients,c).value; // no other client account is modified 
 
     }
 
     spec withdraw {
-        aborts_if amount == 0;
-// withdraw-revert: a withdraw(amount) call reverts if amount is zero or greater than the balance entry of msg.sender. 
+        aborts_if amount == 0; // (9, partially)
         
         modifies global<Bank>(bank); 
 
@@ -60,15 +51,12 @@ spec bank_apt::bank {
 
         let post client_bank_money_post =  simple_map::spec_get(clients,signer::address_of(from)).value;
         // aborts_if !coin::spec_is_account_registered<coin::CoinStore<AptosCoin>>(signer::address_of(from));
-        aborts_if client_bank_money < amount; //  withdraw-revert: a withdraw(amount) call reverts if amount is zero or greater than the balance entry of msg.sender.
-        aborts_if global<coin::CoinStore<AptosCoin>>(signer::address_of(from)).coin.value + amount > MAX_U64 ;
-        ensures global<coin::CoinStore<AptosCoin>>(signer::address_of(from)).coin.value == (old(global<coin::CoinStore<AptosCoin>>(signer::address_of(from))).coin.value + amount);
-        // withdraw-sender-rcv: after a successful withdraw(amount), the ETH balance of the transaction sender is increased by amount ETH.
-        ensures client_bank_money_post == (client_bank_money - amount); 
-        // withdraw-contract-balance: after a successful withdraw(amount), the ETH balance the contract is decreased by amount
+        aborts_if client_bank_money < amount; // (9) 
+        aborts_if global<coin::CoinStore<AptosCoin>>(signer::address_of(from)).coin.value + amount > MAX_U64 ;// (9)
+        ensures global<coin::CoinStore<AptosCoin>>(signer::address_of(from)).coin.value == (old(global<coin::CoinStore<AptosCoin>>(signer::address_of(from))).coin.value + amount); // (10)
+        ensures client_bank_money_post == (client_bank_money - amount); // (12) 
+
         ensures forall c: address where c != signer::address_of(from) && simple_map::spec_contains_key(clients,c):
-            simple_map::spec_get(clients_post,c).value == simple_map::spec_get(clients,c).value; // no other client account is modified, similar to 
-        // user-balance-dec-onlyif-withdraw: the only way to decrease the balance entry of a user a is by calling withdraw with msg.sender = a. (since there is no possibility AFAIK
-        // to define properties over functions in aptos move prover)
+            simple_map::spec_get(clients_post,c).value == simple_map::spec_get(clients,c).value; 
         }
 }
