@@ -100,7 +100,6 @@ module bank_apt::bank_apt_tests {
         coin::destroy_burn_cap(burn_capability);
     }
 
-    use std::debug;
 
     #[test(client = @0xA,bank = @0xB, aptos_framework = @aptos_framework)]
     #[expected_failure]

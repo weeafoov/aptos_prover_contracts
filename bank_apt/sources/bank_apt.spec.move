@@ -48,7 +48,7 @@ spec bank_apt::bank {
         aborts_if global<coin::CoinStore<AptosCoin>>(signer::address_of(client)).coin.value + amount > MAX_U64 ;
         ensures global<coin::CoinStore<AptosCoin>>(signer::address_of(client)).coin.value == (old(global<coin::CoinStore<AptosCoin>>(signer::address_of(client))).coin.value + amount);
         // withdraw-sender-rcv: after a successful withdraw(amount), the ETH balance of the transaction sender is increased by amount ETH.
-        ensures client_bank_money_post == client_bank_money - amount; 
+        ensures client_bank_money_post == (client_bank_money - amount); 
         // withdraw-contract-balance: after a successful withdraw(amount), the ETH balance the contract is decreased by amount
 
         // ensures forall c:address where c != to && simple_map::spec_contains_key(clients,c)
