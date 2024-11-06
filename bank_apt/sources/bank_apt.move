@@ -48,14 +48,14 @@ module bank_apt::bank {
 
     
     //
-    public entry fun withdraw(client : &signer, bank : address, amount : u64) acquires Bank {
+    public entry fun withdraw(from : &signer, bank : address, amount : u64) acquires Bank {
         // do not withdraw 0 
         assert!(amount != 0,EAmountIsZero);
         let bank = borrow_global_mut<Bank>(bank);
-        let current_balance = simple_map::borrow_mut(&mut bank.clients, &signer::address_of(client));
+        let current_balance = simple_map::borrow_mut(&mut bank.clients, &signer::address_of(from));
         let withdrawn = coin::extract(current_balance,amount);
-        // coin::deposit(signer::address_of(client), withdrawn);
-        coin::deposit<AptosCoin>(signer::address_of(client),withdrawn);
+        // coin::deposit(signer::address_of(from), withdrawn);
+        coin::deposit<AptosCoin>(signer::address_of(from),withdrawn);
     }
 
     #[test_only]
