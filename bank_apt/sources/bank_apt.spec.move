@@ -1,12 +1,13 @@
 spec bank_apt::bank {
     spec deposit {
-        // pragma aborts_if_is_strict;
-        // aborts_if amount == 0;
-        // aborts_if !exists<coin::CoinStore<AptosCoin>>(signer::address_of(to));
-        // aborts_if global<coin::CoinStore<Coin<AptosCoin>>>(signer::address_of(to)).coin.value < amount ;
-        // modifies global<coin::CoinStore<AptosCoin>>(signer::address_of(to));
-        // aborts_if global<coin::CoinStore<AptosCoin>>(signer::address_of(to)).coin.value < amount;
-}
+        pragma aborts_if_is_strict;
+        aborts_if amount == 0;
+        aborts_if !exists<coin::CoinStore<AptosCoin>>(signer::address_of(to));
+        aborts_if global<coin::CoinStore<Coin<AptosCoin>>>(signer::address_of(to)).coin.value < amount ;
+        // modifies global<coin::CoinStore<AptosCoin>>(signer::address_of(to));  
+        ensures global<coin::CoinStore<AptosCoin>>(signer::address_of(client)).coin.value == (old(global<coin::CoinStore<AptosCoin>>(signer::address_of(client))).coin.value - amount);
+
+    }
 
     spec withdraw {
         // pragma verify = false;
