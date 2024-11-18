@@ -1,6 +1,11 @@
+# move on aptos build directory
 build
+# tags file, editor generated
 tags
+# prover intermediate artefacts
 .trace
+# test coverage files
 *.mvcov
+# intermediate build artifacts for move on aptos
 *.bpl
 *.txt
